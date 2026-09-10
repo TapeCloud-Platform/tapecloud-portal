@@ -95,27 +95,33 @@ export default function App() {
         onDisplayNameChange={handleDisplayNameChange}
       />
 
-      <main className="portal-shell">
-        <section className="portal-card">
-          <p className="eyebrow">TapeCloud</p>
-          <h1>Elegí tu aplicación</h1>
-          <p className="subtitle">Accedé a TapeFlix o TapeBeat para continuar.</p>
+      <main className="dashboard">
+        <section className="dashboard-choices" aria-label="Seleccioná un sistema">
+          <a className="system-choice tapeflix-choice" href={buildAppUrl('http://localhost:5174')} aria-label="Acceder a TapeFlix">
+            <div className="choice-content">
+              <span className="choice-index">01 / VISUAL STORIES</span>
+              <div className="choice-icon" aria-hidden="true">🎬</div>
+              <h1>TapeFlix</h1>
+              <p>Películas, series y nuevas historias para ver cuando quieras.</p>
+              <span className="choice-cta">
+                Entrar a TapeFlix <span aria-hidden="true">→</span>
+              </span>
+            </div>
+            <span className="choice-corner">CINEMA SYSTEM</span>
+          </a>
 
-          <div className="apps-grid">
-            {apps.map((app) => (
-              <a key={app.id} className="app-link" href={buildAppUrl(app.url)}>
-                {app.logo ? (
-                  <img className="app-icon app-icon--logo" src={app.logo} alt={app.name} />
-                ) : (
-                  <div className="app-icon">{app.name.slice(0, 2).toUpperCase()}</div>
-                )}
-                <div>
-                  <h2>{app.name}</h2>
-                  <p>{app.description}</p>
-                </div>
-              </a>
-            ))}
-          </div>
+          <a className="system-choice tapebeat-choice" href={buildAppUrl('http://localhost:5175')} aria-label="Acceder a TapeBeat">
+            <div className="choice-content">
+              <span className="choice-index">02 / SOUND EXPERIENCES</span>
+              <div className="choice-icon" aria-hidden="true">🎧</div>
+              <h1>TapeBeat</h1>
+              <p>Música, playlists y ritmos para acompañar cada momento.</p>
+              <span className="choice-cta">
+                Entrar a TapeBeat <span aria-hidden="true">→</span>
+              </span>
+            </div>
+            <span className="choice-corner">AUDIO SYSTEM</span>
+          </a>
         </section>
       </main>
     </div>
