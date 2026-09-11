@@ -22,7 +22,10 @@ const apps = [
 ];
 
 export default function App() {
-  const [view, setView] = useState('portal');
+  const [view, setView] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('view') === 'login' ? 'login' : 'portal';
+  });
   const [user, setUser] = useState(() => {
     const email = localStorage.getItem('tapecloud_email');
     const displayName = localStorage.getItem('tapecloud_display_name');
@@ -75,7 +78,7 @@ export default function App() {
 
   function buildAppUrl(baseUrl) {
     if (!user) {
-      return baseUrl;
+      return `${baseUrl}?sso_logout=true`;
     }
     const token = localStorage.getItem('tapecloud_token');
     const params = new URLSearchParams({
