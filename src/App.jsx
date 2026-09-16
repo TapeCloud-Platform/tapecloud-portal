@@ -1,8 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Header from './components/Header';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import tapeflixLogo from './assets/tapeflix-logo.jpeg';
+import tapeflixIconDark from './assets/tapeflix-icon.png';
+import tapebeatIconDark from './assets/tapebeat-icon.png';
+import tapeflixIconLight from './assets/tapeflix-icon-light.png';
+import tapebeatIconLight from './assets/tapebeat-icon-light.png';
 
 const apps = [
   {
@@ -31,6 +35,12 @@ export default function App() {
     const displayName = localStorage.getItem('tapecloud_display_name');
     return email ? { email, displayName: displayName || email.split('@')[0] } : null;
   });
+  const [theme, setTheme] = useState(() => localStorage.getItem('tapecloud_theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('tapecloud_theme', theme);
+  }, [theme]);
 
   function handleLoginSuccess({ token, email, displayName }) {
     localStorage.setItem('tapecloud_token', token);
@@ -76,6 +86,9 @@ export default function App() {
     );
   }
 
+  const tapeflixIcon = theme === 'light' ? tapeflixIconLight : tapeflixIconDark;
+  const tapebeatIcon = theme === 'light' ? tapebeatIconLight : tapebeatIconDark;
+
   function buildAppUrl(baseUrl) {
     if (!user) {
       return `${baseUrl}?sso_logout=true`;
@@ -96,6 +109,8 @@ export default function App() {
         onLoginClick={() => setView('login')}
         onLogoutClick={handleLogout}
         onDisplayNameChange={handleDisplayNameChange}
+        theme={theme}
+        onThemeChange={setTheme}
       />
 
       <main className="dashboard">
@@ -103,7 +118,9 @@ export default function App() {
           <a className="system-choice tapeflix-choice" href={buildAppUrl('http://localhost:5174')} aria-label="Acceder a TapeFlix">
             <div className="choice-content">
               <span className="choice-index">01 / VISUAL STORIES</span>
-              <div className="choice-icon" aria-hidden="true">🎬</div>
+              <div className="choice-icon" aria-hidden="true">
+                <img src={tapeflixIcon} alt="" />
+              </div>
               <h1>TapeFlix</h1>
               <p>Películas, series y nuevas historias para ver cuando quieras.</p>
               <span className="choice-cta">
@@ -116,7 +133,9 @@ export default function App() {
           <a className="system-choice tapebeat-choice" href={buildAppUrl('http://localhost:5175')} aria-label="Acceder a TapeBeat">
             <div className="choice-content">
               <span className="choice-index">02 / SOUND EXPERIENCES</span>
-              <div className="choice-icon" aria-hidden="true">🎧</div>
+              <div className="choice-icon" aria-hidden="true">
+                <img src={tapebeatIcon} alt="" />
+              </div>
               <h1>TapeBeat</h1>
               <p>Música, playlists y ritmos para acompañar cada momento.</p>
               <span className="choice-cta">

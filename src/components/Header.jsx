@@ -1,13 +1,21 @@
 import UserMenu from './UserMenu';
 import SettingsMenu from './SettingsMenu';
-import tapecloudLogo from '../assets/tapecloud-logo.jpeg';
+import tapecloudIconDark from '../assets/tapecloud-icon-dark.png';
+import tapecloudIconLight from '../assets/tapecloud-icon-light.png';
 
-export default function Header({ user, onLoginClick, onLogoutClick, onDisplayNameChange }) {
+export default function Header({ user, onLoginClick, onLogoutClick, onDisplayNameChange, theme, onThemeChange }) {
+  const tapecloudLogo = theme === 'light' ? tapecloudIconLight : tapecloudIconDark;
+
   return (
     <header className="portal-header">
       <div className="portal-header__left">
-        <UserMenu user={user} />
-        <SettingsMenu user={user} onDisplayNameChange={onDisplayNameChange} />
+        <UserMenu user={user} theme={theme} />
+        <SettingsMenu
+          user={user}
+          onDisplayNameChange={onDisplayNameChange}
+          theme={theme}
+          onThemeChange={onThemeChange}
+        />
         {user ? (
           <button type="button" className="login-button" onClick={onLogoutClick}>
             Cerrar sesión
