@@ -72,6 +72,16 @@
   --dash-grain-color: rgba(255, 255, 255, 0.28);
   --dash-grain-blend: soft-light;
 
+  /* Menú de cuenta: glass coherente con las CTAs del dashboard */
+  --menu-bg: rgba(9, 9, 15, 0.78);
+  --menu-border: rgba(255, 255, 255, 0.13);
+  --menu-hover: rgba(255, 255, 255, 0.09);
+  --menu-arc: rgba(255, 255, 255, 0.06);
+  --menu-grain: rgba(255, 255, 255, 0.055);
+  --menu-shadow: rgba(0, 0, 0, 0.5);
+  --menu-scrollbar: rgba(255, 255, 255, 0.24);
+  --menu-scrollbar-hover: rgba(255, 255, 255, 0.45);
+
   --tapeflix-gradient: radial-gradient(ellipse at 0% 52%, rgba(211, 32, 62, 0.35), transparent 55%),
               radial-gradient(ellipse at 53% 42%, rgba(138, 32, 54, 0.17), transparent 38%),
               linear-gradient(115deg, #090306 0%, #17070e 53%, #0b070d 100%);
@@ -83,14 +93,17 @@
   color: var(--ink);
 }
 
+/* Tema claro: misma dramaturgia que el oscuro, traducida a papel.
+   Base tintada (no gris genérico), radiales de marca presentes,
+   grano/anillos/glass con el mismo peso relativo que en oscuro. */
 :root[data-theme='light'] {
-  --bg: #f5f6fa;
+  --bg: #f5f2f1;
   --ink: #14151d;
   --muted: rgba(20, 21, 29, 0.66);
   --text-secondary: #3f4657;
   --text-tertiary: #626b7e;
   --text-disabled: #9aa1b3;
-  --accent: #1d4ed8;
+  --accent: #d3203e;
 
   --panel-bg: rgba(255, 255, 255, 0.97);
   --card-bg: rgba(255, 255, 255, 0.92);
@@ -103,21 +116,30 @@
 
   --dashboard-ink: #14151d;
   --dashboard-muted: rgba(20, 21, 29, 0.66);
-  --dash-glass-bg: rgba(20, 21, 29, 0.05);
-  --dash-glass-border: rgba(20, 21, 29, 0.18);
+  --dash-glass-bg: rgba(20, 21, 29, 0.07);
+  --dash-glass-border: rgba(20, 21, 29, 0.26);
   --dash-glass-highlight: rgba(255, 255, 255, 0.6);
-  --dash-ring-border: rgba(20, 21, 29, 0.14);
-  --dash-index-color: rgba(20, 21, 29, 0.55);
-  --dash-corner-color: rgba(20, 21, 29, 0.4);
-  --dash-grain-color: rgba(20, 21, 29, 0.16);
+  --dash-ring-border: rgba(20, 21, 29, 0.2);
+  --dash-index-color: rgba(20, 21, 29, 0.62);
+  --dash-corner-color: rgba(20, 21, 29, 0.5);
+  --dash-grain-color: rgba(20, 21, 29, 0.26);
   --dash-grain-blend: multiply;
 
-  --tapeflix-gradient: radial-gradient(ellipse at 0% 52%, rgba(211, 32, 62, 0.14), transparent 55%),
-              radial-gradient(ellipse at 53% 42%, rgba(138, 32, 54, 0.07), transparent 38%),
-              linear-gradient(115deg, #fdf3f4 0%, #fbe9ec 53%, #fdf4f6 100%);
-  --tapebeat-gradient: radial-gradient(ellipse at 100% 52%, rgba(34, 197, 94, 0.16), transparent 55%),
-              radial-gradient(ellipse at 47% 42%, rgba(21, 128, 61, 0.09), transparent 38%),
-              linear-gradient(245deg, #f2faf5 0%, #e7f6ec 53%, #f4faf6 100%);
+  --menu-bg: rgba(255, 255, 255, 0.88);
+  --menu-border: rgba(15, 23, 42, 0.16);
+  --menu-hover: rgba(20, 21, 29, 0.06);
+  --menu-arc: rgba(15, 23, 42, 0.1);
+  --menu-grain: rgba(15, 23, 42, 0.07);
+  --menu-shadow: rgba(15, 23, 42, 0.22);
+  --menu-scrollbar: rgba(20, 21, 29, 0.28);
+  --menu-scrollbar-hover: rgba(20, 21, 29, 0.5);
+
+  --tapeflix-gradient: radial-gradient(ellipse at 0% 52%, rgba(211, 32, 62, 0.3), transparent 56%),
+              radial-gradient(ellipse at 53% 42%, rgba(138, 32, 54, 0.12), transparent 40%),
+              linear-gradient(115deg, #fdf0f2 0%, #f9dde2 53%, #fdf1f4 100%);
+  --tapebeat-gradient: radial-gradient(ellipse at 100% 52%, rgba(34, 197, 94, 0.32), transparent 56%),
+              radial-gradient(ellipse at 47% 42%, rgba(21, 128, 61, 0.13), transparent 40%),
+              linear-gradient(245deg, #effaf3 0%, #dcf3e5 53%, #f1faf5 100%);
 }
 
 * {
@@ -164,8 +186,11 @@ body {
   height: 44px;
   padding: 0;
   border-radius: 50%;
-  border: 1px solid var(--border);
-  background: var(--surface-bg);
+  border: 1px solid var(--menu-border);
+  background: var(--dash-glass-bg);
+  box-shadow: inset 0 1px var(--dash-glass-highlight);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.15s ease, border-color 0.15s ease;
@@ -175,7 +200,7 @@ body {
 .account-menu__trigger:focus-visible,
 .account-menu__trigger[data-state='open'] {
   transform: scale(1.05);
-  border-color: var(--accent);
+  border-color: var(--dash-glass-border);
 }
 
 .account-menu__trigger-avatar {
@@ -185,46 +210,131 @@ body {
 }
 
 .account-menu__panel {
-  width: 320px;
+  counter-reset: account-section;
+  position: relative;
+  width: 340px;
   max-height: min(80vh, 640px);
   overflow-y: auto;
-  padding: 18px;
-  border-radius: 14px;
-  background: var(--panel-bg);
-  border: 1px solid var(--border-soft);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.4);
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid var(--menu-border);
+  /* Grano + arco "ring" + tintes de marca (rojo TapeFlix / verde TapeBeat),
+     en el mismo lenguaje que las tarjetas del dashboard. */
+  background:
+    radial-gradient(circle at 104% -6%, transparent 55.5%, var(--menu-arc) 56%, transparent 56.9%),
+    radial-gradient(var(--menu-grain) 0.7px, transparent 0.7px) 0 0 / 5px 5px,
+    radial-gradient(ellipse at 10% -8%, rgba(211, 32, 62, 0.17), transparent 52%),
+    radial-gradient(ellipse at 96% 108%, rgba(34, 197, 94, 0.13), transparent 48%),
+    var(--menu-bg);
+  box-shadow: inset 0 1px var(--dash-glass-highlight), 0 24px 60px var(--menu-shadow);
+  backdrop-filter: blur(22px) saturate(1.25);
+  -webkit-backdrop-filter: blur(22px) saturate(1.25);
   z-index: 10;
-  animation: dropdown-out 0.15s ease;
+  animation: account-menu-out 0.15s ease;
 }
 
 .account-menu__panel[data-state='open'] {
-  animation: dropdown-in 0.15s ease;
+  animation: account-menu-in 0.18s ease;
+}
+
+/* Scrollbar propio: fino, translúcido y redondeado, en tono glass.
+   Firefox usa scrollbar-width/color; Chromium/Edge usan ::-webkit-scrollbar. */
+.account-menu__panel {
+  scrollbar-width: thin;
+  scrollbar-color: var(--menu-scrollbar) transparent;
+}
+
+.account-menu__panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.account-menu__panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.account-menu__panel::-webkit-scrollbar-thumb {
+  background-color: var(--menu-scrollbar);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.account-menu__panel::-webkit-scrollbar-thumb:hover {
+  background-color: var(--menu-scrollbar-hover);
+}
+
+.account-menu__panel::-webkit-scrollbar-corner,
+.account-menu__panel::-webkit-scrollbar-button:single-button {
+  display: none;
+  background: transparent;
+}
+
+@keyframes account-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes account-menu-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .account-menu__section-title {
-  margin: 0 0 10px;
-  font-weight: 700;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  margin: 2px 0 12px;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--dash-index-color);
+}
+
+/* Numeración "01 /", "02 /" como los índices del dashboard (01 / VISUAL STORIES) */
+.account-menu__section-title::before,
+.account-menu__section-toggle::before {
+  counter-increment: account-section;
+  content: counter(account-section, decimal-leading-zero) ' / ';
 }
 
 .account-menu__section-toggle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
   margin: 0 0 10px;
   padding: 0;
   border: none;
   background: none;
   cursor: pointer;
-  font-weight: 700;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--dash-index-color);
+  transition: color 0.15s ease;
+}
+
+.account-menu__section-toggle::before {
+  margin-right: 0.55em;
+}
+
+.account-menu__section-toggle .user-menu__chevron {
+  margin-left: auto;
+}
+
+.account-menu__section-toggle:hover {
+  color: var(--ink);
 }
 
 .account-menu__section-toggle--spaced {
@@ -245,21 +355,18 @@ body {
 
 .account-menu__guest-cta {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 14px;
 }
 
 .account-menu__guest-cta .settings-menu__hint {
   margin: 0;
-  flex: 1;
-  min-width: 160px;
 }
 
 .account-menu__guest-cta .login-button {
-  flex-shrink: 0;
-  padding: 8px 16px;
+  padding: 10px 18px;
 }
 
 .login-button {
@@ -277,6 +384,49 @@ body {
   background: var(--ink);
   color: var(--bg);
   transform: scale(1.04);
+}
+
+/* Dentro del menú de cuenta, los botones primarios adoptan la píldora glass
+   de las CTAs del dashboard en lugar del azul de marca. */
+.account-menu__panel .login-button--primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--dash-glass-border);
+  background: var(--dash-glass-bg);
+  color: var(--dashboard-ink);
+  font-weight: 700;
+  font-size: 0.82rem;
+  box-shadow: inset 0 1px var(--dash-glass-highlight);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.account-menu__panel .login-button--primary:hover:not(:disabled) {
+  background: var(--menu-hover);
+  border-color: var(--dash-glass-border);
+  color: var(--dashboard-ink);
+  transform: none;
+}
+
+.account-menu__panel .login-button--primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.account-menu__cta-arrow {
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.3s ease;
+}
+
+.account-menu__panel .login-button--primary:hover:not(:disabled) .account-menu__cta-arrow {
+  transform: translateX(4px);
 }
 
 .login-button--danger {
@@ -630,8 +780,9 @@ a.app-switcher__item:hover {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--surface-bg-strong);
-  border: 1px solid var(--border);
+  background: var(--menu-hover);
+  border: 1px solid var(--menu-border);
+  box-shadow: inset 0 1px var(--dash-glass-highlight);
   font-size: 1.4rem;
   flex-shrink: 0;
 }
@@ -661,19 +812,24 @@ a.app-switcher__item:hover {
   align-items: center;
   gap: 12px;
   padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-softer);
 }
 
 .user-menu__name {
   margin: 0;
-  font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 1.02rem;
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 
 .user-menu__email {
-  margin: 2px 0 0;
-  font-size: 0.8rem;
-  color: var(--text-tertiary);
+  margin: 3px 0 0;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.03em;
+  color: var(--dash-corner-color);
 }
 
 .user-menu__reviews {
@@ -687,11 +843,19 @@ a.app-switcher__item:hover {
   justify-content: space-between;
   background: none;
   border: none;
-  color: var(--ink);
-  font-weight: 600;
-  font-size: 0.9rem;
+  color: var(--dash-index-color);
+  font-family: 'DM Mono', monospace;
+  font-weight: 500;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 6px 0;
+  transition: color 0.15s ease;
+}
+
+.user-menu__reviews-toggle:hover {
+  color: var(--ink);
 }
 
 .user-menu__chevron {
@@ -705,22 +869,31 @@ a.app-switcher__item:hover {
 .user-menu__list {
   list-style: none;
   margin: 10px 0 0;
-  padding: 0;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
+  border: 1px solid var(--border-softer);
+  border-radius: 14px;
+  background: var(--dash-glass-bg);
 }
 
 .user-menu__list li {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
+}
+
+.user-menu__list li span {
+  color: var(--text-tertiary);
 }
 
 .user-menu__list strong {
   color: var(--ink);
+  font-weight: 700;
+  text-align: right;
 }
 
 /* Íconos de carga */
@@ -774,10 +947,18 @@ a.app-switcher__item:hover {
   background: none;
   border: none;
   color: var(--ink);
-  font-size: 0.85rem;
-  padding: 8px 0;
+  font-size: 0.87rem;
+  font-weight: 600;
+  padding: 9px 12px;
+  margin: 0 -4px;
+  width: calc(100% + 8px);
   cursor: pointer;
-  border-bottom: 1px solid var(--border-softer);
+  border-radius: 12px;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.settings-menu__item:hover:not(:disabled):not(.settings-menu__item--theme) {
+  background: var(--menu-hover);
 }
 
 .settings-menu__item:disabled {
@@ -786,16 +967,21 @@ a.app-switcher__item:hover {
 }
 
 .settings-menu__item.settings-menu__item--danger {
-  margin-top: 10px;
+  margin-top: 14px;
+  width: 100%;
   justify-content: center;
-  border: 1px solid #ef4444;
-  border-radius: 8px;
-  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  border-radius: 999px;
+  padding: 10px 18px;
+  color: #f87171;
   font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+  background: rgba(239, 68, 68, 0.07);
 }
 
 .settings-menu__item.settings-menu__item--danger:hover {
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(239, 68, 68, 0.15);
 }
 
 .settings-menu__item--theme {
@@ -803,10 +989,13 @@ a.app-switcher__item:hover {
 }
 
 .settings-menu__badge {
-  font-size: 0.7rem;
-  padding: 2px 8px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
   border-radius: 999px;
-  background: var(--border-softer);
+  border: 1px solid var(--border);
   color: var(--text-tertiary);
 }
 
@@ -815,8 +1004,9 @@ a.app-switcher__item:hover {
   gap: 3px;
   padding: 3px;
   border-radius: 999px;
-  background: var(--surface-bg);
-  border: 1px solid var(--border);
+  background: var(--dash-glass-bg);
+  border: 1px solid var(--dash-glass-border);
+  box-shadow: inset 0 1px var(--dash-glass-highlight);
 }
 
 .theme-toggle__option {
@@ -825,8 +1015,11 @@ a.app-switcher__item:hover {
   border: none;
   background: none;
   color: var(--text-tertiary);
-  font-size: 0.76rem;
-  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: 0.15s ease;
 }
@@ -839,17 +1032,23 @@ a.app-switcher__item:hover {
 .settings-menu__form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 4px 0 10px;
+  gap: 9px;
+  padding: 6px 0 12px;
 }
 
 .settings-menu__form input {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface-bg);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  background: var(--input-bg);
   color: var(--ink);
   font-size: 0.85rem;
+  transition: border-color 0.15s ease;
+}
+
+.settings-menu__form input:focus {
+  outline: none;
+  border-color: var(--dash-glass-border);
 }
 
 .settings-menu__message {

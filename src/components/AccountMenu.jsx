@@ -4,8 +4,8 @@ import { getMyReviewStats, getMe, updateUsername, changePassword, updateAvatar, 
 import { resizeImageToDataUri } from '../avatar';
 import { SkeletonStatsList } from './Skeleton';
 import ConfirmDialog from './ConfirmDialog';
-import userIconDark from '../assets/user-icon-dark.png';
-import userIconLight from '../assets/user-icon-light.png';
+import userIconDark from '../assets/user-icon-dark.svg';
+import userIconLight from '../assets/user-icon-light.svg';
 
 const PANELS = {
   NONE: 'none',
@@ -301,6 +301,7 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
               <p className="settings-menu__hint">¡Para obtener la experiencia de TapeCloud, iniciá sesión!</p>
               <button type="button" className="login-button login-button--primary" onClick={onLoginClick}>
                 Iniciar sesión
+                <span className="account-menu__cta-arrow" aria-hidden="true">→</span>
               </button>
             </div>
           )}
