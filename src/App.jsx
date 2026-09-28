@@ -3,7 +3,7 @@ import Header from './components/Header';
 import AuthModal from './components/AuthModal';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import { logout } from './api';
+import { logout, checkSession } from './api';
 import tapeflixLogo from './assets/tapeflix-logo.jpeg';
 import tapeflixIconDark from './assets/tapeflix-icon.png';
 import tapebeatIconDark from './assets/tapebeat-icon.png';
@@ -97,6 +97,35 @@ export default function App() {
     }
     // Solo al montar: limpia los parámetros que dejó la app de origen sin tocar `view`.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // La limpieza por iframe puede no llegar (los navegadores particionan el
+    // storage de iframes de terceros): al mostrar el portal se revalida el
+    // token contra el backend y un 401 limpia la sesión local.
+    let cancelled = false;
+    async function validateSession() {
+      const token = localStorage.getItem('tapecloud_token');
+      if (!token) {
+        return;
+      }
+      const valid = await checkSession(token);
+      if (!valid && !cancelled) {
+        localStorage.removeItem('tapecloud_token');
+        localStorage.removeItem('tapecloud_email');
+        localStorage.removeItem('tapecloud_display_name');
+        localStorage.removeItem('tapecloud_avatar');
+        setUser(null);
+      }
+    }
+    validateSession();
+    window.addEventListener('focus', validateSession);
+    window.addEventListener('pageshow', validateSession);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', validateSession);
+      window.removeEventListener('pageshow', validateSession);
+    };
   }, []);
 
   useEffect(() => {
