@@ -217,7 +217,7 @@ body {
 .account-menu__panel {
   counter-reset: account-section;
   position: relative;
-  width: 340px;
+  width: min(340px, calc(100vw - 32px));
   max-height: min(80vh, 640px);
   overflow-y: auto;
   padding: 20px;
@@ -641,6 +641,18 @@ body {
 
 .otp-input__cell:disabled {
   opacity: 0.6;
+}
+
+@media (max-width: 380px) {
+  .otp-input {
+    gap: 6px;
+  }
+
+  .otp-input__cell {
+    width: 40px;
+    height: 50px;
+    font-size: 1.3rem;
+  }
 }
 
 .auth-modal-overlay {
