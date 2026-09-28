@@ -83,6 +83,11 @@ export async function getMyReviewStats(token) {
   return authedRequest('/api/reviews/me/stats', 'GET', token);
 }
 
+/** Invalida el JWT en el backend (bump de tokenVersion). 204 = sin contenido. */
+export async function logout(token) {
+  return authedRequest('/api/auth/logout', 'POST', token);
+}
+
 export async function getMe(token) {
   return authedRequest('/api/auth/me', 'GET', token);
 }

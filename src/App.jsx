@@ -3,6 +3,7 @@ import Header from './components/Header';
 import AuthModal from './components/AuthModal';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import { logout } from './api';
 import tapeflixLogo from './assets/tapeflix-logo.jpeg';
 import tapeflixIconDark from './assets/tapeflix-icon.png';
 import tapebeatIconDark from './assets/tapebeat-icon.png';
@@ -35,10 +36,16 @@ export default function App() {
     return params.get('view') === 'login' ? 'login' : 'portal';
   });
   const [user, setUser] = useState(() => {
-    // Si venimos de un login hecho en TapeFlix/TapeBeat, esos datos llegan por
-    // query params (mismo mecanismo que ya usa el tema) y hay que persistirlos
-    // acá, porque cada app tiene su propio localStorage al ser otro origen.
     const params = new URLSearchParams(window.location.search);
+    // Cierre de sesión global: otra app del ecosistema avisa con ?sso_logout=true
+    // (cada origen limpia su propio localStorage, nadie puede tocar el ajeno).
+    if (params.get('sso_logout') === 'true') {
+      localStorage.removeItem('tapecloud_token');
+      localStorage.removeItem('tapecloud_email');
+      localStorage.removeItem('tapecloud_display_name');
+      localStorage.removeItem('tapecloud_avatar');
+      return null;
+    }
     const incomingToken = params.get('sso_token');
     const incomingEmail = params.get('sso_email');
     if (incomingToken && incomingEmail) {
@@ -119,7 +126,34 @@ export default function App() {
     setView('portal');
   }
 
-  function handleLogout() {
+  function broadcastLogout() {
+    // Avisa a TapeFlix/TapeBeat con iframes invisibles para que cierren su
+    // propia sesión (cada origen limpia su propio localStorage).
+    const params = new URLSearchParams({ sso_logout: 'true', sso_theme: theme });
+    for (const baseUrl of [TAPEFLIX_URL, TAPEBEAT_URL]) {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.setAttribute('aria-hidden', 'true');
+      iframe.src = `${baseUrl}/?${params.toString()}`;
+      document.body.appendChild(iframe);
+      iframe.addEventListener('load', () => {
+        setTimeout(() => iframe.remove(), 500);
+      });
+    }
+  }
+
+  async function handleLogout() {
+    // 1. Invalida el JWT en el backend (aunque falle, se sigue con la limpieza local).
+    const token = localStorage.getItem('tapecloud_token');
+    if (token) {
+      try {
+        await logout(token);
+      } catch {
+        // Sin conexión o token ya inválido: igual se cierra localmente.
+      }
+    }
+    // 2. Avisa a las apps para que cierren su propia sesión (SSO).
+    broadcastLogout();
     localStorage.removeItem('tapecloud_token');
     localStorage.removeItem('tapecloud_email');
     localStorage.removeItem('tapecloud_display_name');
