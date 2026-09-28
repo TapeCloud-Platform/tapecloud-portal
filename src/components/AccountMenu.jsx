@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { getMyReviewStats, getMe, updateUsername, changePassword, updateAvatar, setupTotp, enableTotp, disableTotp } from '../api';
+import { getMyReviewStats, getMe, updateUsername, changePassword, deleteAccount, updateAvatar, setupTotp, enableTotp, disableTotp } from '../api';
 import { resizeImageToDataUri } from '../avatar';
 import { SkeletonStatsList } from './Skeleton';
 import ConfirmDialog from './ConfirmDialog';
@@ -12,6 +12,7 @@ const PANELS = {
   USERNAME: 'username',
   PASSWORD: 'password',
   TOTP: 'totp',
+  DELETE: 'delete',
 };
 
 export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDisplayNameChange, onAvatarChange, theme, onThemeChange }) {
@@ -43,6 +44,8 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
   const [configOpen, setConfigOpen] = useState(false);
 
   const displayName = user ? user.displayName || user.email.split('@')[0] : 'Invitado';
@@ -205,6 +208,29 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
   function handleLogoutConfirm() {
     setConfirmLogoutOpen(false);
     onLogoutClick();
+  }
+
+  function handleDeleteRequest(event) {
+    event.preventDefault();
+    resetFeedback();
+    setConfirmDeleteOpen(true);
+  }
+
+  async function handleDeleteConfirm() {
+    setConfirmDeleteOpen(false);
+    resetFeedback();
+    setLoading(true);
+    try {
+      await deleteAccount(token, deletePassword);
+      setDeletePassword('');
+      setMenuOpen(false);
+      // La cuenta ya no existe: se sale en todas las apps como un logout global.
+      onLogoutClick();
+    } catch (err) {
+      setError(err.message || 'No se pudo eliminar la cuenta.');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -497,6 +523,37 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
               Cerrar sesión
             </button>
           )}
+
+          <button
+            type="button"
+            className="settings-menu__item settings-menu__item--danger"
+            onClick={() => openPanel(PANELS.DELETE)}
+            disabled={!user}
+          >
+            Eliminar cuenta
+          </button>
+
+          {activePanel === PANELS.DELETE && (
+            <form
+              className="settings-menu__form"
+              onSubmit={handleDeleteRequest}
+              onKeyDown={(event) => event.stopPropagation()}
+            >
+              <p className="settings-menu__hint">
+                Se borran tu cuenta, tus reseñas, comentarios y likes. No se puede deshacer.
+              </p>
+              <input
+                type="password"
+                placeholder="Confirmá tu contraseña"
+                value={deletePassword}
+                onChange={(event) => setDeletePassword(event.target.value)}
+                required
+              />
+              <button type="submit" className="login-button login-button--primary" disabled={loading}>
+                Continuar
+              </button>
+            </form>
+          )}
             </>
           )}
 
@@ -514,6 +571,17 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
         danger
         onConfirm={handleLogoutConfirm}
         onCancel={() => setConfirmLogoutOpen(false)}
+      />
+    )}
+
+    {confirmDeleteOpen && (
+      <ConfirmDialog
+        title="Eliminar cuenta"
+        message="¿Estás seguro? Se borran tu cuenta, tus reseñas, comentarios y likes de forma definitiva."
+        confirmLabel="Eliminar definitivamente"
+        danger
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDeleteOpen(false)}
       />
     )}
     </>

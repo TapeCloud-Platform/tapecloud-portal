@@ -79,6 +79,11 @@ export async function changePassword(token, currentPassword, newPassword) {
   return authedRequest('/api/auth/me/password', 'PATCH', token, { currentPassword, newPassword });
 }
 
+/** Borrado definitivo de la cuenta (pide contraseña). 204 = sin contenido. */
+export async function deleteAccount(token, password) {
+  return authedRequest('/api/auth/me', 'DELETE', token, { password });
+}
+
 export async function getMyReviewStats(token) {
   return authedRequest('/api/reviews/me/stats', 'GET', token);
 }
