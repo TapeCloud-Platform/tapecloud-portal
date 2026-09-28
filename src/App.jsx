@@ -9,19 +9,22 @@ import tapebeatIconDark from './assets/tapebeat-icon.png';
 import tapeflixIconLight from './assets/tapeflix-icon-light.png';
 import tapebeatIconLight from './assets/tapebeat-icon-light.png';
 
+const TAPEFLIX_URL = import.meta.env.VITE_TAPEFLIX_URL || 'http://localhost:5174';
+const TAPEBEAT_URL = import.meta.env.VITE_TAPEBEAT_URL || 'http://localhost:5175';
+
 const apps = [
   {
     id: 'tapeflix',
     name: 'TapeFlix',
     description: 'Películas, series y reseñas.',
-    url: 'http://localhost:5174',
+    url: TAPEFLIX_URL,
     logo: tapeflixLogo,
   },
   {
     id: 'tapebeat',
     name: 'TapeBeat',
     description: 'Música, artistas y playlists.',
-    url: 'http://localhost:5175',
+    url: TAPEBEAT_URL,
     logo: null,
   },
 ];
@@ -172,7 +175,7 @@ export default function App() {
 
       <main className="dashboard">
         <section className="dashboard-choices" aria-label="Seleccioná un sistema">
-          <a className="system-choice tapeflix-choice" href={buildAppUrl('http://localhost:5174')} aria-label="Acceder a TapeFlix">
+          <a className="system-choice tapeflix-choice" href={buildAppUrl(TAPEFLIX_URL)} aria-label="Acceder a TapeFlix">
             <div className="choice-content">
               <span className="choice-index">01 / VISUAL STORIES</span>
               <div className="choice-icon" aria-hidden="true">
@@ -187,7 +190,7 @@ export default function App() {
             <span className="choice-corner">CINEMA SYSTEM</span>
           </a>
 
-          <a className="system-choice tapebeat-choice" href={buildAppUrl('http://localhost:5175')} aria-label="Acceder a TapeBeat">
+          <a className="system-choice tapebeat-choice" href={buildAppUrl(TAPEBEAT_URL)} aria-label="Acceder a TapeBeat">
             <div className="choice-content">
               <span className="choice-index">02 / SOUND EXPERIENCES</span>
               <div className="choice-icon" aria-hidden="true">
