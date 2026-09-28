@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { getMyReviewStats, getMe, updateUsername, changePassword, deleteAccount, updateAvatar, setupTotp, enableTotp, disableTotp } from '../api';
+import { getMyReviewStats, updateUsername, changePassword, deleteAccount, updateAvatar } from '../api';
 import { resizeImageToDataUri } from '../avatar';
 import { SkeletonStatsList } from './Skeleton';
 import ConfirmDialog from './ConfirmDialog';
+import TotpModal from './TotpModal';
 import userIconDark from '../assets/user-icon-dark.svg';
 import userIconLight from '../assets/user-icon-light.svg';
 
@@ -11,7 +12,6 @@ const PANELS = {
   NONE: 'none',
   USERNAME: 'username',
   PASSWORD: 'password',
-  TOTP: 'totp',
   DELETE: 'delete',
 };
 
@@ -37,15 +37,11 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const [totpEnabled, setTotpEnabled] = useState(null);
-  const [totpSetup, setTotpSetup] = useState(null);
-  const [totpCode, setTotpCode] = useState('');
-  const [totpPassword, setTotpPassword] = useState('');
-
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
+  const [totpModalOpen, setTotpModalOpen] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
 
   const displayName = user ? user.displayName || user.email.split('@')[0] : 'Invitado';
@@ -74,20 +70,7 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
 
   async function openPanel(panel) {
     resetFeedback();
-    const next = activePanel === panel ? PANELS.NONE : panel;
-    setActivePanel(next);
-
-    if (next === PANELS.TOTP) {
-      setTotpSetup(null);
-      setTotpCode('');
-      setTotpPassword('');
-      try {
-        const me = await getMe(token);
-        setTotpEnabled(me.totpEnabled);
-      } catch (err) {
-        setError(err.message || 'No se pudo consultar el estado de la verificación en dos pasos.');
-      }
-    }
+    setActivePanel(activePanel === panel ? PANELS.NONE : panel);
   }
 
   async function handleAvatarPick(event) {
@@ -149,52 +132,6 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
       setNewPassword('');
     } catch (err) {
       setError(err.message || 'No se pudo actualizar la contraseña.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleTotpSetup() {
-    resetFeedback();
-    setLoading(true);
-    try {
-      const response = await setupTotp(token);
-      setTotpSetup(response);
-    } catch (err) {
-      setError(err.message || 'No se pudo generar el código QR.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleTotpEnable(event) {
-    event.preventDefault();
-    resetFeedback();
-    setLoading(true);
-    try {
-      await enableTotp(token, totpCode);
-      setTotpEnabled(true);
-      setTotpSetup(null);
-      setTotpCode('');
-      setMessage('Verificación en dos pasos activada.');
-    } catch (err) {
-      setError(err.message || 'No se pudo activar la verificación en dos pasos.');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleTotpDisable(event) {
-    event.preventDefault();
-    resetFeedback();
-    setLoading(true);
-    try {
-      await disableTotp(token, totpPassword);
-      setTotpEnabled(false);
-      setTotpPassword('');
-      setMessage('Verificación en dos pasos desactivada.');
-    } catch (err) {
-      setError(err.message || 'No se pudo desactivar la verificación en dos pasos.');
     } finally {
       setLoading(false);
     }
@@ -417,75 +354,12 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
           <button
             type="button"
             className="settings-menu__item"
-            onClick={() => openPanel(PANELS.TOTP)}
+            onClick={() => setTotpModalOpen(true)}
             disabled={!user}
           >
             Verificación en dos pasos
+            <span aria-hidden="true">→</span>
           </button>
-
-          {activePanel === PANELS.TOTP && (
-            <div className="settings-menu__form" onKeyDown={(event) => event.stopPropagation()}>
-              {totpEnabled === null && <p className="settings-menu__hint">Cargando...</p>}
-
-              {totpEnabled === true && (
-                <form onSubmit={handleTotpDisable}>
-                  <p className="settings-menu__hint">Ya está activada. Ingresá tu contraseña para desactivarla.</p>
-                  <input
-                    type="password"
-                    placeholder="Contraseña"
-                    value={totpPassword}
-                    onChange={(event) => setTotpPassword(event.target.value)}
-                    required
-                  />
-                  <button type="submit" className="login-button login-button--primary" disabled={loading}>
-                    Desactivar
-                  </button>
-                </form>
-              )}
-
-              {totpEnabled === false && !totpSetup && (
-                <>
-                  <p className="settings-menu__hint">
-                    Agregá un segundo paso con Google Authenticator (o cualquier app compatible con TOTP).
-                  </p>
-                  <button
-                    type="button"
-                    className="login-button login-button--primary"
-                    onClick={handleTotpSetup}
-                    disabled={loading}
-                  >
-                    Generar código QR
-                  </button>
-                </>
-              )}
-
-              {totpEnabled === false && totpSetup && (
-                <form onSubmit={handleTotpEnable}>
-                  <p className="settings-menu__hint">Escaneá el código con tu app de autenticación.</p>
-                  <img
-                    src={totpSetup.qrCodeDataUri}
-                    alt="Código QR para configurar la verificación en dos pasos"
-                    style={{ width: 180, height: 180, alignSelf: 'center' }}
-                  />
-                  <p className="settings-menu__hint">
-                    ¿No podés escanear? Ingresá esta clave manualmente: <code>{totpSetup.secret}</code>
-                  </p>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    placeholder="Código de 6 dígitos"
-                    value={totpCode}
-                    onChange={(event) => setTotpCode(event.target.value)}
-                    required
-                    maxLength={6}
-                  />
-                  <button type="submit" className="login-button login-button--primary" disabled={loading}>
-                    Confirmar y activar
-                  </button>
-                </form>
-              )}
-            </div>
-          )}
 
           <div className="settings-menu__item settings-menu__item--theme">
             Tema
@@ -584,6 +458,8 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
         onCancel={() => setConfirmDeleteOpen(false)}
       />
     )}
+
+    {totpModalOpen && <TotpModal onClose={() => setTotpModalOpen(false)} />}
     </>
   );
 }
