@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
-import { getMyReviewStats, updateUsername, changePassword, deleteAccount, updateAvatar } from '../api';
+import { getMyReviewStats, updateUsername, changePassword, updateAvatar } from '../api';
 import { resizeImageToDataUri } from '../avatar';
 import { SkeletonStatsList } from './Skeleton';
 import ConfirmDialog from './ConfirmDialog';
 import TotpModal from './TotpModal';
+import DeleteAccountModal from './DeleteAccountModal';
 import userIconDark from '../assets/user-icon-dark.svg';
 import userIconLight from '../assets/user-icon-light.svg';
 
@@ -12,7 +13,6 @@ const PANELS = {
   NONE: 'none',
   USERNAME: 'username',
   PASSWORD: 'password',
-  DELETE: 'delete',
 };
 
 export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDisplayNameChange, onAvatarChange, theme, onThemeChange }) {
@@ -39,9 +39,8 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
   const [totpModalOpen, setTotpModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
 
   const displayName = user ? user.displayName || user.email.split('@')[0] : 'Invitado';
@@ -147,27 +146,11 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
     onLogoutClick();
   }
 
-  function handleDeleteRequest(event) {
-    event.preventDefault();
-    resetFeedback();
-    setConfirmDeleteOpen(true);
-  }
-
-  async function handleDeleteConfirm() {
-    setConfirmDeleteOpen(false);
-    resetFeedback();
-    setLoading(true);
-    try {
-      await deleteAccount(token, deletePassword);
-      setDeletePassword('');
-      setMenuOpen(false);
-      // La cuenta ya no existe: se sale en todas las apps como un logout global.
-      onLogoutClick();
-    } catch (err) {
-      setError(err.message || 'No se pudo eliminar la cuenta.');
-    } finally {
-      setLoading(false);
-    }
+  function handleDeleteDone() {
+    // La cuenta ya no existe: se sale en todas las apps como un logout global.
+    setDeleteModalOpen(false);
+    setMenuOpen(false);
+    onLogoutClick();
   }
 
   return (
@@ -401,33 +384,11 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
           <button
             type="button"
             className="settings-menu__item settings-menu__item--danger"
-            onClick={() => openPanel(PANELS.DELETE)}
+            onClick={() => setDeleteModalOpen(true)}
             disabled={!user}
           >
             Eliminar cuenta
           </button>
-
-          {activePanel === PANELS.DELETE && (
-            <form
-              className="settings-menu__form"
-              onSubmit={handleDeleteRequest}
-              onKeyDown={(event) => event.stopPropagation()}
-            >
-              <p className="settings-menu__hint">
-                Se borran tu cuenta, tus reseñas, comentarios y likes. No se puede deshacer.
-              </p>
-              <input
-                type="password"
-                placeholder="Confirmá tu contraseña"
-                value={deletePassword}
-                onChange={(event) => setDeletePassword(event.target.value)}
-                required
-              />
-              <button type="submit" className="login-button login-button--primary" disabled={loading}>
-                Continuar
-              </button>
-            </form>
-          )}
             </>
           )}
 
@@ -448,18 +409,11 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
       />
     )}
 
-    {confirmDeleteOpen && (
-      <ConfirmDialog
-        title="Eliminar cuenta"
-        message="¿Estás seguro? Se borran tu cuenta, tus reseñas, comentarios y likes de forma definitiva."
-        confirmLabel="Eliminar definitivamente"
-        danger
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setConfirmDeleteOpen(false)}
-      />
-    )}
-
     {totpModalOpen && <TotpModal onClose={() => setTotpModalOpen(false)} />}
+
+    {deleteModalOpen && (
+      <DeleteAccountModal onClose={() => setDeleteModalOpen(false)} onDeleted={handleDeleteDone} />
+    )}
     </>
   );
 }

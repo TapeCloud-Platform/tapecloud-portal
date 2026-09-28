@@ -79,9 +79,14 @@ export async function changePassword(token, currentPassword, newPassword) {
   return authedRequest('/api/auth/me/password', 'PATCH', token, { currentPassword, newPassword });
 }
 
-/** Borrado definitivo de la cuenta (pide contraseña). 204 = sin contenido. */
-export async function deleteAccount(token, password) {
-  return authedRequest('/api/auth/me', 'DELETE', token, { password });
+/** Borrado definitivo de la cuenta (pide contraseña + código 2FA o email). 204 = sin contenido. */
+export async function deleteAccount(token, { password, totpCode, emailCode }) {
+  return authedRequest('/api/auth/me', 'DELETE', token, { password, totpCode, emailCode });
+}
+
+/** Envía por email el código para confirmar la eliminación (solo cuentas sin 2FA). */
+export async function requestDeleteCode(token) {
+  return authedRequest('/api/auth/me/delete-code', 'POST', token);
 }
 
 export async function getMyReviewStats(token) {

@@ -586,6 +586,29 @@ body {
   z-index: 2000;
 }
 
+/* Aviso de zona de peligro en el popup de eliminar cuenta */
+.delete-warning {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.delete-warning--final {
+  border-color: rgba(239, 68, 68, 0.7);
+  background: rgba(239, 68, 68, 0.14);
+  font-weight: 600;
+}
+
+.auth-submit.settings-menu__item--danger-inline {
+  border: 1px solid rgba(239, 68, 68, 0.55);
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
 /* Código de verificación en 6 celdas que actúa como un solo campo */
 .otp-input {
   display: flex;
