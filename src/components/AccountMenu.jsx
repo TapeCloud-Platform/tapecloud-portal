@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { getMyReviewStats, updateUsername, changePassword, updateAvatar } from '../api';
 import { resizeImageToDataUri } from '../avatar';
+import { isUsernameBlocked } from '../utils/profanity';
 import { SkeletonStatsList } from './Skeleton';
 import ConfirmDialog from './ConfirmDialog';
 import TotpModal from './TotpModal';
@@ -107,6 +108,10 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
   async function handleUsernameSubmit(event) {
     event.preventDefault();
     resetFeedback();
+    if (isUsernameBlocked(usernameInput)) {
+      setError('Ese nombre de usuario contiene lenguaje no permitido. Elegí otro.');
+      return;
+    }
     setLoading(true);
     try {
       const response = await updateUsername(token, usernameInput);

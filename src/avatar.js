@@ -1,15 +1,14 @@
-const MAX_SOURCE_BYTES = 8 * 1024 * 1024;
+import { IMAGE_LIMITS, validateImageDimensions, validateImageFile } from './utils/imageValidation';
+
+const MAX_SOURCE_BYTES = IMAGE_LIMITS.maxBytes;
 const OUTPUT_SIZE = 160;
 
-/** Lee una imagen, la recorta a un cuadrado centrado y la reduce a un data URI liviano. */
+/** Lee una imagen, valida tipo/peso/dimensiones, la recorta a un cuadrado centrado y la reduce a un data URI liviano. */
 export function resizeImageToDataUri(file) {
   return new Promise((resolve, reject) => {
-    if (!file.type.startsWith('image/')) {
-      reject(new Error('El archivo tiene que ser una imagen.'));
-      return;
-    }
-    if (file.size > MAX_SOURCE_BYTES) {
-      reject(new Error('La imagen no puede pesar más de 8 MB.'));
+    const fileError = validateImageFile(file);
+    if (fileError) {
+      reject(new Error(fileError));
       return;
     }
 
@@ -18,7 +17,12 @@ export function resizeImageToDataUri(file) {
     reader.onload = () => {
       const img = new Image();
       img.onerror = () => reject(new Error('El archivo no es una imagen válida.'));
-      img.onload = () => {
+      img.onload = async () => {
+        const dimensionError = await validateImageDimensions(file);
+        if (dimensionError) {
+          reject(new Error(dimensionError));
+          return;
+        }
         const canvas = document.createElement('canvas');
         canvas.width = OUTPUT_SIZE;
         canvas.height = OUTPUT_SIZE;
