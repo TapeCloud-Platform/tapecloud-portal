@@ -4,11 +4,10 @@ import AuthModal from './components/AuthModal';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import { logout, checkSession, getMe } from './api';
-import tapeflixLogo from './assets/tapeflix-logo.jpeg';
-import tapeflixIconDark from './assets/tapeflix-icon.png';
-import tapebeatIconDark from './assets/tapebeat-icon.png';
-import tapeflixIconLight from './assets/tapeflix-icon-light.png';
-import tapebeatIconLight from './assets/tapebeat-icon-light.png';
+import tapeflixLogoLight from './assets/tapeflix-logo-light.png';
+import tapeflixLogoDark from './assets/tapeflix-logo-dark.png';
+import tapebeatLogoLight from './assets/tapebeat-logo-light.png';
+import tapebeatLogoDark from './assets/tapebeat-logo-dark.png';
 
 const TAPEFLIX_URL = import.meta.env.VITE_TAPEFLIX_URL || 'http://localhost:5174';
 const TAPEBEAT_URL = import.meta.env.VITE_TAPEBEAT_URL || 'http://localhost:5175';
@@ -19,14 +18,12 @@ const apps = [
     name: 'TapeFlix',
     description: 'Películas, series y reseñas.',
     url: TAPEFLIX_URL,
-    logo: tapeflixLogo,
   },
   {
     id: 'tapebeat',
     name: 'TapeBeat',
     description: 'Música, artistas y playlists.',
     url: TAPEBEAT_URL,
-    logo: null,
   },
 ];
 
@@ -208,8 +205,8 @@ export default function App() {
     setUser((current) => (current ? { ...current, avatarDataUri: avatarDataUri || null } : current));
   }
 
-  const tapeflixIcon = theme === 'light' ? tapeflixIconLight : tapeflixIconDark;
-  const tapebeatIcon = theme === 'light' ? tapebeatIconLight : tapebeatIconDark;
+  const tapeflixLogo = theme === 'light' ? tapeflixLogoLight : tapeflixLogoDark;
+  const tapebeatLogo = theme === 'light' ? tapebeatLogoLight : tapebeatLogoDark;
 
   function buildAppUrl(baseUrl) {
     if (!user) {
@@ -245,7 +242,7 @@ export default function App() {
             <div className="choice-content">
               <span className="choice-index">01 / VISUAL STORIES</span>
               <div className="choice-icon" aria-hidden="true">
-                <img src={tapeflixIcon} alt="" />
+                <img src={tapeflixLogo} alt="" />
               </div>
               <h1>TapeFlix</h1>
               <p>Películas, series y nuevas historias para ver cuando quieras.</p>
@@ -260,7 +257,7 @@ export default function App() {
             <div className="choice-content">
               <span className="choice-index">02 / SOUND EXPERIENCES</span>
               <div className="choice-icon" aria-hidden="true">
-                <img src={tapebeatIcon} alt="" />
+                <img src={tapebeatLogo} alt="" />
               </div>
               <h1>TapeBeat</h1>
               <p>Música, playlists y ritmos para acompañar cada momento.</p>

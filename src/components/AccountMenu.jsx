@@ -9,6 +9,8 @@ import TotpModal from './TotpModal';
 import DeleteAccountModal from './DeleteAccountModal';
 import userIconDark from '../assets/user-icon-dark.svg';
 import userIconLight from '../assets/user-icon-light.svg';
+import tapecloudLogoDark from '../assets/tapecloud-logo-dark.png';
+import tapecloudLogoLight from '../assets/tapecloud-logo-light.png';
 
 const PANELS = {
   NONE: 'none',
@@ -18,7 +20,9 @@ const PANELS = {
 
 export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDisplayNameChange, onAvatarChange, theme, onThemeChange }) {
   const defaultIcon = theme === 'light' ? userIconLight : userIconDark;
-  const avatarSrc = user?.avatarDataUri || defaultIcon;
+  // Sin sesión: logo de TapeCloud. Logueado sin foto: silueta actual.
+  const guestIcon = theme === 'light' ? tapecloudLogoLight : tapecloudLogoDark;
+  const avatarSrc = user?.avatarDataUri || (user ? defaultIcon : guestIcon);
   const fileInputRef = useRef(null);
   const token = user ? localStorage.getItem('tapecloud_token') : null;
 
