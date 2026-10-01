@@ -175,15 +175,44 @@ body {
   z-index: 100;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 32px;
+  gap: 20px;
+  padding: 14px 32px;
 }
 
-.portal-header__title {
-  position: relative;
+.portal-header__left {
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-shrink: 0;
+}
+
+.portal-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.portal-header__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.portal-header__wordmark {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.portal-header__tagline {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, #94a3b8);
+}
+
+.portal-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
 }
 
 .account-menu__trigger {
@@ -290,7 +319,7 @@ body {
 .portal-header__logo {
   width: auto;
   max-width: 150px;
-  height: 40px;
+  height: 42px;
   object-fit: contain;
 }
 
@@ -1520,5 +1549,39 @@ a.app-switcher__item:hover {
 h1 {
   margin: 0;
   font-size: clamp(2rem, 4vw, 3.2rem);
+}
+
+/* Tarjetas con logos apaisados: sin mosaico, logo contenido y sin rotación */
+.choice-icon {
+  width: auto;
+  height: auto;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  border-radius: 0;
+  margin-bottom: clamp(1.4rem, 3vw, 2.4rem);
+}
+
+.choice-icon img {
+  width: auto;
+  max-width: min(280px, 52vw);
+  height: clamp(84px, 12vw, 128px);
+  border-radius: 0;
+}
+
+.tapeflix-choice .choice-icon,
+.tapebeat-choice .choice-icon {
+  background: transparent;
+  transform: none;
+}
+
+:root[data-theme='light'] .tapeflix-choice .choice-icon,
+:root[data-theme='light'] .tapebeat-choice .choice-icon {
+  background: transparent;
+}
+
+.system-choice:hover .choice-icon {
+  transform: scale(1.05);
+  box-shadow: none;
 }
 

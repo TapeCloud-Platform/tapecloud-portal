@@ -8,19 +8,27 @@ export default function Header({ user, onLoginClick, onLogoutClick, onDisplayNam
 
   return (
     <header className="portal-header">
-      <AccountMenu
-        user={user}
-        onLoginClick={onLoginClick}
-        onLogoutClick={onLogoutClick}
-        onDisplayNameChange={onDisplayNameChange}
-        onAvatarChange={onAvatarChange}
-        theme={theme}
-        onThemeChange={onThemeChange}
-      />
+      <div className="portal-header__left">
+        <AccountMenu
+          user={user}
+          onLoginClick={onLoginClick}
+          onLogoutClick={onLogoutClick}
+          onDisplayNameChange={onDisplayNameChange}
+          onAvatarChange={onAvatarChange}
+          theme={theme}
+          onThemeChange={onThemeChange}
+        />
+      </div>
 
-      <div className="portal-header__title">
+      <div className="portal-header__brand">
         <img className="portal-header__logo" src={tapecloudLogo} alt="TapeCloud" />
-        <span className="portal-header__text">Portal de TapeCloud</span>
+        <span className="portal-header__brand-text">
+          <span className="portal-header__wordmark">TapeCloud</span>
+          <span className="portal-header__tagline">Ecosistema</span>
+        </span>
+      </div>
+
+      <div className="portal-header__actions">
         <AppSwitcher current="tapecloud" theme={theme} logoSrc={tapecloudLogo} appName="TapeCloud" />
       </div>
     </header>
