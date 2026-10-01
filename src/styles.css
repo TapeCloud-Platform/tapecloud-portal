@@ -238,6 +238,25 @@ body {
   animation: account-menu-out 0.15s ease;
 }
 
+/* Menú de cuenta opaco: sin transparencias ni blur */
+.account-menu__panel {
+  background: var(--bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+:root[data-theme='dark'] .account-menu__panel {
+  background: #0d1526;
+}
+
+:root[data-theme='light'] .account-menu__panel {
+  background: #ffffff;
+}
+
+.account-menu__section-title--spaced {
+  margin-top: 18px;
+}
+
 .account-menu__panel[data-state='open'] {
   animation: account-menu-in 0.18s ease;
 }
