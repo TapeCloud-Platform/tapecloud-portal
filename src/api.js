@@ -1,8 +1,11 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
+// Sesión por cookie httpOnly (tapecloud_token). El JWT ya no toca JS.
+
 async function postJson(path, payload) {
   const response = await fetch(`${API_URL}${path}`, {
     method: 'POST',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
@@ -42,15 +45,16 @@ export async function resendVerificationCode(email) {
   return postJson('/api/auth/resend-code', { email });
 }
 
-async function authedRequest(path, method, token, payload) {
-  const response = await fetch(`${API_URL}${path}`, {
+async function authedRequest(path, method, _token, payload) {
+  const init = {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (payload !== undefined) {
+    init.body = JSON.stringify(payload);
+  }
+  const response = await fetch(`${API_URL}${path}`, init);
 
   if (response.status === 204) {
     return null;
@@ -67,66 +71,63 @@ async function authedRequest(path, method, token, payload) {
   return body;
 }
 
-export async function updateUsername(token, username) {
-  return authedRequest('/api/auth/me/username', 'PATCH', token, { username });
+export async function updateUsername(_token, username) {
+  return authedRequest('/api/auth/me/username', 'PATCH', undefined, { username });
 }
 
-export async function updateAvatar(token, avatarDataUri) {
-  return authedRequest('/api/auth/me/avatar', 'PATCH', token, { avatarDataUri });
+export async function updateAvatar(_token, avatarDataUri) {
+  return authedRequest('/api/auth/me/avatar', 'PATCH', undefined, { avatarDataUri });
 }
 
-export async function changePassword(token, currentPassword, newPassword) {
-  return authedRequest('/api/auth/me/password', 'PATCH', token, { currentPassword, newPassword });
+export async function changePassword(_token, currentPassword, newPassword) {
+  return authedRequest('/api/auth/me/password', 'PATCH', undefined, { currentPassword, newPassword });
 }
 
 /** Borrado definitivo de la cuenta (pide contraseña + código 2FA o email). 204 = sin contenido. */
-export async function deleteAccount(token, { password, totpCode, emailCode }) {
-  return authedRequest('/api/auth/me', 'DELETE', token, { password, totpCode, emailCode });
+export async function deleteAccount(_token, { password, totpCode, emailCode }) {
+  return authedRequest('/api/auth/me', 'DELETE', undefined, { password, totpCode, emailCode });
 }
 
 /** Envía por email el código para confirmar la eliminación (solo cuentas sin 2FA). */
-export async function requestDeleteCode(token) {
-  return authedRequest('/api/auth/me/delete-code', 'POST', token);
+export async function requestDeleteCode() {
+  return authedRequest('/api/auth/me/delete-code', 'POST');
 }
 
-export async function getMyReviewStats(token) {
-  return authedRequest('/api/reviews/me/stats', 'GET', token);
+export async function getMyReviewStats() {
+  return authedRequest('/api/reviews/me/stats', 'GET');
 }
 
-/** Invalida el JWT en el backend (bump de tokenVersion). 204 = sin contenido. */
-export async function logout(token) {
-  return authedRequest('/api/auth/logout', 'POST', token);
+/** Invalida la sesión en el backend (bump de tokenVersion + limpia cookie). 204 = sin contenido. */
+export async function logout() {
+  return authedRequest('/api/auth/logout', 'POST');
 }
 
 /**
- * Valida la sesión contra el backend. Devuelve false solo con 401 (token
- * revocado: logout desde otra app, cambio de contraseña, etc). Con error de
- * red se asume válida para no cerrar sesiones por estar offline.
+ * Valida la sesión contra el backend (cookie). Devuelve false solo con 401.
+ * Con error de red se asume válida para no cerrar sesiones por estar offline.
  */
-export async function checkSession(token) {
+export async function checkSession() {
   let response;
   try {
-    response = await fetch(`${API_URL}/api/auth/me`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    response = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' });
   } catch {
     return true;
   }
   return response.status !== 401;
 }
 
-export async function getMe(token) {
-  return authedRequest('/api/auth/me', 'GET', token);
+export async function getMe() {
+  return authedRequest('/api/auth/me', 'GET');
 }
 
-export async function setupTotp(token) {
-  return authedRequest('/api/auth/2fa/setup', 'POST', token);
+export async function setupTotp() {
+  return authedRequest('/api/auth/2fa/setup', 'POST');
 }
 
-export async function enableTotp(token, code) {
-  return authedRequest('/api/auth/2fa/enable', 'POST', token, { code });
+export async function enableTotp(_token, code) {
+  return authedRequest('/api/auth/2fa/enable', 'POST', undefined, { code });
 }
 
-export async function disableTotp(token, password) {
-  return authedRequest('/api/auth/2fa/disable', 'POST', token, { password });
+export async function disableTotp(_token, password) {
+  return authedRequest('/api/auth/2fa/disable', 'POST', undefined, { password });
 }

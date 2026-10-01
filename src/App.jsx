@@ -3,7 +3,7 @@ import Header from './components/Header';
 import AuthModal from './components/AuthModal';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import { logout, checkSession } from './api';
+import { logout, checkSession, getMe } from './api';
 import tapeflixLogo from './assets/tapeflix-logo.jpeg';
 import tapeflixIconDark from './assets/tapeflix-icon.png';
 import tapebeatIconDark from './assets/tapebeat-icon.png';
@@ -40,18 +40,16 @@ export default function App() {
     // Cierre de sesión global: otra app del ecosistema avisa con ?sso_logout=true
     // (cada origen limpia su propio localStorage, nadie puede tocar el ajeno).
     if (params.get('sso_logout') === 'true') {
-      localStorage.removeItem('tapecloud_token');
       localStorage.removeItem('tapecloud_email');
       localStorage.removeItem('tapecloud_display_name');
       localStorage.removeItem('tapecloud_avatar');
       return null;
     }
-    const incomingToken = params.get('sso_token');
+    // La auth viaja por cookie httpOnly: ya no se acepta sso_token por URL.
     const incomingEmail = params.get('sso_email');
-    if (incomingToken && incomingEmail) {
+    if (incomingEmail) {
       const displayName = params.get('sso_display_name') || incomingEmail.split('@')[0];
       const avatarDataUri = params.get('sso_avatar') || null;
-      localStorage.setItem('tapecloud_token', incomingToken);
       localStorage.setItem('tapecloud_email', incomingEmail);
       localStorage.setItem('tapecloud_display_name', displayName);
       if (avatarDataUri) {
@@ -100,22 +98,33 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    // La limpieza por iframe puede no llegar (los navegadores particionan el
-    // storage de iframes de terceros): al mostrar el portal se revalida el
-    // token contra el backend y un 401 limpia la sesión local.
+    // Sesión por cookie httpOnly; un 401 limpia el perfil UI local.
+    // Si hay cookie válida pero sin perfil local, se restaura vía /me.
     let cancelled = false;
     async function validateSession() {
-      const token = localStorage.getItem('tapecloud_token');
-      if (!token) {
-        return;
-      }
-      const valid = await checkSession(token);
+      const valid = await checkSession();
       if (!valid && !cancelled) {
-        localStorage.removeItem('tapecloud_token');
         localStorage.removeItem('tapecloud_email');
         localStorage.removeItem('tapecloud_display_name');
         localStorage.removeItem('tapecloud_avatar');
         setUser(null);
+        return;
+      }
+      if (valid && !localStorage.getItem('tapecloud_email') && !cancelled) {
+        try {
+          const me = await getMe();
+          if (cancelled) return;
+          localStorage.setItem('tapecloud_email', me.email);
+          localStorage.setItem('tapecloud_display_name', me.displayName || me.email.split('@')[0]);
+          if (me.avatarDataUri) localStorage.setItem('tapecloud_avatar', me.avatarDataUri);
+          setUser({
+            email: me.email,
+            displayName: me.displayName || me.email.split('@')[0],
+            avatarDataUri: me.avatarDataUri || null,
+          });
+        } catch {
+          // /me falló pero la cookie parece válida: no se cierra sesión.
+        }
       }
     }
     validateSession();
@@ -142,8 +151,7 @@ export default function App() {
     return () => window.removeEventListener('pageshow', handlePageShow);
   }, []);
 
-  function handleLoginSuccess({ token, email, displayName, avatarDataUri }) {
-    localStorage.setItem('tapecloud_token', token);
+  function handleLoginSuccess({ email, displayName, avatarDataUri }) {
     localStorage.setItem('tapecloud_email', email);
     localStorage.setItem('tapecloud_display_name', displayName || email.split('@')[0]);
     if (avatarDataUri) {
@@ -172,18 +180,14 @@ export default function App() {
   }
 
   async function handleLogout() {
-    // 1. Invalida el JWT en el backend (aunque falle, se sigue con la limpieza local).
-    const token = localStorage.getItem('tapecloud_token');
-    if (token) {
-      try {
-        await logout(token);
-      } catch {
-        // Sin conexión o token ya inválido: igual se cierra localmente.
-      }
+    // 1. Invalida la sesión en el backend (limpia cookie; aunque falle, se sigue local).
+    try {
+      await logout();
+    } catch {
+      // Sin conexión o sesión ya inválida: igual se cierra localmente.
     }
-    // 2. Avisa a las apps para que cierren su propia sesión (SSO).
+    // 2. Avisa a las apps para que cierren su propio perfil UI (SSO).
     broadcastLogout();
-    localStorage.removeItem('tapecloud_token');
     localStorage.removeItem('tapecloud_email');
     localStorage.removeItem('tapecloud_display_name');
     localStorage.removeItem('tapecloud_avatar');
@@ -211,9 +215,8 @@ export default function App() {
     if (!user) {
       return `${baseUrl}?${new URLSearchParams({ sso_logout: 'true', sso_theme: theme }).toString()}`;
     }
-    const token = localStorage.getItem('tapecloud_token');
+    // Solo perfil UI por URL; la auth viaja por cookie del API.
     const params = new URLSearchParams({
-      sso_token: token || '',
       sso_email: user.email,
       sso_display_name: user.displayName || '',
       sso_theme: theme,
