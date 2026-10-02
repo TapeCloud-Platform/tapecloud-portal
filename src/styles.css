@@ -1603,7 +1603,7 @@ h1 {
 
 /* Pie sólido del ecosistema */
 .app-footer {
-  margin-top: 64px;
+  margin-top: 0;
   border-top: 2px solid #3b82f6;
   background: var(--panel-bg);
 }
