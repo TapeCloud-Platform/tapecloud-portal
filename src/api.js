@@ -1,12 +1,32 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-// Sesión por cookie httpOnly (tapecloud_token). El JWT ya no toca JS.
+// Sesion hibrida: cookie httpOnly (principal) + token en memoria (respaldo).
+// El token vive solo en memoria JS (se pierde al recargar, nunca toca storage):
+// si el navegador bloquea cookies de terceros, igual viaja por header Bearer.
+let memoryToken = null;
+
+export function setMemoryToken(token) {
+  memoryToken = token || null;
+}
+
+export function clearMemoryToken() {
+  memoryToken = null;
+}
+
+function authHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    ...(memoryToken ? { Authorization: `Bearer ${memoryToken}` } : {}),
+  };
+}
+
+// Sesión híbrida: cookie httpOnly (principal) + Bearer en memoria (respaldo).
 
 async function postJson(path, payload) {
   const response = await fetch(`${API_URL}${path}`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
     body: JSON.stringify(payload),
   });
 
@@ -49,7 +69,7 @@ async function authedRequest(path, method, _token, payload) {
   const init = {
     method,
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders(),
   };
   if (payload !== undefined) {
     init.body = JSON.stringify(payload);
@@ -110,7 +130,7 @@ export async function logout() {
 export async function checkSession() {
   let response;
   try {
-    response = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' });
+    response = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include', headers: authHeaders() });
   } catch {
     return true;
   }

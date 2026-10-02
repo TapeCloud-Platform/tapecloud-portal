@@ -3,7 +3,7 @@ import Header from './components/Header';
 import AuthModal from './components/AuthModal';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import { logout, checkSession, getMe } from './api';
+import { logout, checkSession, getMe, setMemoryToken, clearMemoryToken } from './api';
 import tapeflixLogoLight from './assets/tapeflix-logo-light.png';
 import tapeflixLogoDark from './assets/tapeflix-logo-dark.png';
 import tapebeatLogoLight from './assets/tapebeat-logo-light.png';
@@ -148,7 +148,10 @@ export default function App() {
     return () => window.removeEventListener('pageshow', handlePageShow);
   }, []);
 
-  function handleLoginSuccess({ email, displayName, avatarDataUri }) {
+  function handleLoginSuccess({ token, email, displayName, avatarDataUri }) {
+    // Híbrido: cookie httpOnly (la setea el backend) + token en memoria
+    // como respaldo si el navegador bloquea cookies de terceros.
+    setMemoryToken(token);
     localStorage.setItem('tapecloud_email', email);
     localStorage.setItem('tapecloud_display_name', displayName || email.split('@')[0]);
     if (avatarDataUri) {
@@ -185,6 +188,7 @@ export default function App() {
     }
     // 2. Avisa a las apps para que cierren su propio perfil UI (SSO).
     broadcastLogout();
+    clearMemoryToken();
     localStorage.removeItem('tapecloud_email');
     localStorage.removeItem('tapecloud_display_name');
     localStorage.removeItem('tapecloud_avatar');
