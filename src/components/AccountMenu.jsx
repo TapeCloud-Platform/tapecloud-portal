@@ -179,7 +179,7 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
       <DropdownMenu.Portal>
         <DropdownMenu.Content className="account-menu__panel" align="start" sideOffset={10}>
           {/* ---- 01 / Usuario ---- */}
-          <p className="account-menu__section-title">01 / Usuario</p>
+          <p className="account-menu__section-title">Usuario</p>
 
           <div className="user-menu__profile">
             <img className="user-menu__avatar user-menu__avatar--large" src={avatarSrc} alt="" />
@@ -235,7 +235,7 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
           {/* ---- 02 / Personalización (solo con sesión) ---- */}
           {user && (
             <>
-              <p className="account-menu__section-title account-menu__section-title--spaced">02 / Personalización</p>
+              <p className="account-menu__section-title account-menu__section-title--spaced">Personalización</p>
 
               <div className="account-menu__avatar-actions">
                 <button
@@ -338,7 +338,7 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
           )}
 
           {/* ---- 03 / Configuración ---- */}
-          <p className="account-menu__section-title account-menu__section-title--spaced">03 / Configuración</p>
+          <p className="account-menu__section-title account-menu__section-title--spaced">Configuración</p>
 
           <div className="settings-menu__item settings-menu__item--theme">
             Tema

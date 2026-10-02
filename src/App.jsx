@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -244,35 +245,35 @@ export default function App() {
         <section className="dashboard-choices" aria-label="Seleccioná un sistema">
           <a className="system-choice tapeflix-choice" href={buildAppUrl(TAPEFLIX_URL)} aria-label="Acceder a TapeFlix">
             <div className="choice-content">
-              <span className="choice-index">01 / VISUAL STORIES</span>
+              <span className="choice-index">Cine y series</span>
               <div className="choice-icon" aria-hidden="true">
                 <img src={tapeflixLogo} alt="" />
               </div>
               <h1>TapeFlix</h1>
-              <p>Películas, series y nuevas historias para ver cuando quieras.</p>
+              <p>Descubrí películas y series, calificá con estrellas y compartí tus reseñas.</p>
               <span className="choice-cta">
                 Entrar a TapeFlix <span aria-hidden="true">→</span>
               </span>
             </div>
-            <span className="choice-corner">CINEMA SYSTEM</span>
           </a>
 
           <a className="system-choice tapebeat-choice" href={buildAppUrl(TAPEBEAT_URL)} aria-label="Acceder a TapeBeat">
             <div className="choice-content">
-              <span className="choice-index">02 / SOUND EXPERIENCES</span>
+              <span className="choice-index">Música y artistas</span>
               <div className="choice-icon" aria-hidden="true">
                 <img src={tapebeatLogo} alt="" />
               </div>
               <h1>TapeBeat</h1>
-              <p>Música, playlists y ritmos para acompañar cada momento.</p>
+              <p>Explorá canciones, álbumes y artistas, y dejá tu reseña en cada tema.</p>
               <span className="choice-cta">
                 Entrar a TapeBeat <span aria-hidden="true">→</span>
               </span>
             </div>
-            <span className="choice-corner">AUDIO SYSTEM</span>
           </a>
         </section>
       </main>
+
+      <Footer theme={theme} />
 
       {(view === 'login' || view === 'register') && (
         <AuthModal onClose={() => setView('portal')} theme={theme}>
