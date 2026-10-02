@@ -42,7 +42,6 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
   const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
   const [totpModalOpen, setTotpModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [configOpen, setConfigOpen] = useState(false);
 
   const displayName = user ? user.displayName || user.email.split('@')[0] : 'Invitado';
   const displayEmail = user ? user.email : 'Sesión de invitado';
@@ -179,8 +178,8 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content className="account-menu__panel" align="start" sideOffset={10}>
-          {/* ---- Sección Usuario ---- */}
-          <p className="account-menu__section-title">Usuario</p>
+          {/* ---- 01 / Usuario ---- */}
+          <p className="account-menu__section-title">01 / Usuario</p>
 
           <div className="user-menu__profile">
             <img className="user-menu__avatar user-menu__avatar--large" src={avatarSrc} alt="" />
@@ -189,30 +188,6 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
               <p className="user-menu__email">{displayEmail}</p>
             </div>
           </div>
-
-          {user && (
-            <div className="account-menu__avatar-actions">
-              <button
-                type="button"
-                className="settings-menu__item"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={avatarUploading}
-              >
-                {avatarUploading ? 'Subiendo...' : 'Cambiar foto de perfil'}
-              </button>
-              {user.avatarDataUri && (
-                <button
-                  type="button"
-                  className="settings-menu__item"
-                  onClick={handleAvatarRemove}
-                  disabled={avatarUploading}
-                >
-                  Quitar foto
-                </button>
-              )}
-              {avatarError && <p className="error">{avatarError}</p>}
-            </div>
-          )}
 
           {user && (
             <div className="user-menu__reviews">
@@ -257,97 +232,113 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
             </div>
           )}
 
-          {/* ---- Sección Configuración (colapsable) ---- */}
-          <button
-            type="button"
-            className="account-menu__section-toggle account-menu__section-toggle--spaced"
-            onClick={() => setConfigOpen((open) => !open)}
-            aria-expanded={configOpen}
-          >
-            Configuración
-            <span className={`user-menu__chevron ${configOpen ? 'is-open' : ''}`}>›</span>
-          </button>
-
-          {configOpen && (
+          {/* ---- 02 / Personalización (solo con sesión) ---- */}
+          {user && (
             <>
-          <button
-            type="button"
-            className="settings-menu__item"
-            onClick={() => openPanel(PANELS.USERNAME)}
-            disabled={!user}
-          >
-            Cambiar nombre de usuario
-          </button>
+              <p className="account-menu__section-title account-menu__section-title--spaced">02 / Personalización</p>
 
-          {activePanel === PANELS.USERNAME && (
-            <form
-              className="settings-menu__form"
-              onSubmit={handleUsernameSubmit}
-              onKeyDown={(event) => event.stopPropagation()}
-            >
-              <input
-                type="text"
-                placeholder="Nuevo nombre de usuario"
-                value={usernameInput}
-                onChange={(event) => setUsernameInput(event.target.value)}
-                required
-                minLength={3}
-                maxLength={30}
-              />
-              <p className="settings-menu__hint">
-                Es el mismo que usás para iniciar sesión: solo letras, números, puntos y guiones bajos.
-              </p>
-              <button type="submit" className="login-button login-button--primary" disabled={loading}>
-                Guardar
+              <div className="account-menu__avatar-actions">
+                <button
+                  type="button"
+                  className="settings-menu__item"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={avatarUploading}
+                >
+                  {avatarUploading ? 'Subiendo...' : 'Cambiar foto de perfil'}
+                </button>
+                {user.avatarDataUri && (
+                  <button
+                    type="button"
+                    className="settings-menu__item"
+                    onClick={handleAvatarRemove}
+                    disabled={avatarUploading}
+                  >
+                    Quitar foto
+                  </button>
+                )}
+                {avatarError && <p className="error">{avatarError}</p>}
+              </div>
+
+              <button
+                type="button"
+                className="settings-menu__item"
+                onClick={() => openPanel(PANELS.USERNAME)}
+              >
+                Cambiar nombre de usuario
               </button>
-            </form>
+
+              {activePanel === PANELS.USERNAME && (
+                <form
+                  className="settings-menu__form"
+                  onSubmit={handleUsernameSubmit}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
+                  <input
+                    type="text"
+                    placeholder="Nuevo nombre de usuario"
+                    value={usernameInput}
+                    onChange={(event) => setUsernameInput(event.target.value)}
+                    required
+                    minLength={3}
+                    maxLength={30}
+                  />
+                  <p className="settings-menu__hint">
+                    Es el mismo que usás para iniciar sesión: solo letras, números, puntos y guiones bajos.
+                  </p>
+                  <button type="submit" className="login-button login-button--primary" disabled={loading}>
+                    Guardar
+                  </button>
+                </form>
+              )}
+
+              <button
+                type="button"
+                className="settings-menu__item"
+                onClick={() => openPanel(PANELS.PASSWORD)}
+              >
+                Cambiar contraseña
+              </button>
+
+              {activePanel === PANELS.PASSWORD && (
+                <form
+                  className="settings-menu__form"
+                  onSubmit={handlePasswordSubmit}
+                  onKeyDown={(event) => event.stopPropagation()}
+                >
+                  <input
+                    type="password"
+                    placeholder="Contraseña actual"
+                    value={currentPassword}
+                    onChange={(event) => setCurrentPassword(event.target.value)}
+                    required
+                  />
+                  <input
+                    type="password"
+                    placeholder="Nueva contraseña (mínimo 8 caracteres)"
+                    value={newPassword}
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    required
+                    minLength={8}
+                  />
+                  <button type="submit" className="login-button login-button--primary" disabled={loading}>
+                    Guardar
+                  </button>
+                </form>
+              )}
+
+              <button
+                type="button"
+                className="settings-menu__item"
+                onClick={() => setTotpModalOpen(true)}
+              >
+                Verificación en dos pasos
+                <span aria-hidden="true">→</span>
+              </button>
+            </>
           )}
 
-          <button
-            type="button"
-            className="settings-menu__item"
-            onClick={() => openPanel(PANELS.PASSWORD)}
-            disabled={!user}
-          >
-            Cambiar contraseña
-          </button>
-
-          {activePanel === PANELS.PASSWORD && (
-            <form
-              className="settings-menu__form"
-              onSubmit={handlePasswordSubmit}
-              onKeyDown={(event) => event.stopPropagation()}
-            >
-              <input
-                type="password"
-                placeholder="Contraseña actual"
-                value={currentPassword}
-                onChange={(event) => setCurrentPassword(event.target.value)}
-                required
-              />
-              <input
-                type="password"
-                placeholder="Nueva contraseña"
-                value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
-                required
-                minLength={6}
-              />
-              <button type="submit" className="login-button login-button--primary" disabled={loading}>
-                Guardar
-              </button>
-            </form>
-          )}
-
-          <button
-            type="button"
-            className="settings-menu__item"
-            onClick={() => setTotpModalOpen(true)}
-            disabled={!user}
-          >
-            Verificación en dos pasos
-            <span aria-hidden="true">→</span>
-          </button>
+          {/* ---- 03 / Configuración ---- */}
+          <p className="account-menu__section-title account-menu__section-title--spaced">03 / Configuración</p>
 
           <div className="settings-menu__item settings-menu__item--theme">
             Tema
@@ -386,15 +377,14 @@ export default function AccountMenu({ user, onLoginClick, onLogoutClick, onDispl
             </button>
           )}
 
-          <button
-            type="button"
-            className="settings-menu__item settings-menu__item--danger"
-            onClick={() => setDeleteModalOpen(true)}
-            disabled={!user}
-          >
-            Eliminar cuenta
-          </button>
-            </>
+          {user && (
+            <button
+              type="button"
+              className="settings-menu__item settings-menu__item--danger"
+              onClick={() => setDeleteModalOpen(true)}
+            >
+              Eliminar cuenta
+            </button>
           )}
 
           {message && <p className="settings-menu__message">{message}</p>}

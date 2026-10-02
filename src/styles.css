@@ -1546,6 +1546,22 @@ a.app-switcher__item:hover {
   font-size: 12px;
 }
 
+/* Marca TapeCloud en azul de marca (no el rojo de acento) */
+.auth-modal-brand .eyebrow {
+  color: #5b8cff;
+}
+
+:root[data-theme='light'] .auth-modal-brand .eyebrow {
+  color: #2563eb;
+}
+
+/* El asterisco de requerido va en la misma línea que el label */
+.login-form .auth-field label {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 4px;
+}
+
 h1 {
   margin: 0;
   font-size: clamp(2rem, 4vw, 3.2rem);
